@@ -1,3 +1,7 @@
+--Create database--
+CREATE DATABASE OnlineRetailDB;
+GO
+	
 --สร้างตารางข้อมูล--
 CREATE TABLE Customers (
 	CustomerID INT PRIMARY KEY IDENTITY(1,1),
@@ -30,7 +34,7 @@ CREATE TABLE Orders (
 
 );
 
--- Alter / Rename the Column Name
+-- Alter / เปลี่ยนชื่อคอลัมน์ในตาราง
 EXEC sp_rename 'OnlineRetailDB.dbo.Orders.CustomerId', 'CustomerID', 'COLUMN'; 
 
 CREATE TABLE OrderItems (
@@ -90,8 +94,8 @@ WHERE o.CustomerID = 1;
 
 --Query 2: หายอดขายรวม (total sales) ของสินค้าแต่ละรายการ
 SELECT p.ProductID, p.ProductName, SUM(oi.Quantity * oi.Price) AS TotalSales
-FROM OrderItems oi
-JOIN Products p 
+FROM OrderItems as oi
+JOIN Products as p 
 ON oi.ProductID = p.ProductID
 GROUP BY p.ProductID, p.ProductName
 ORDER BY TotalSales DESC;
@@ -102,10 +106,10 @@ FROM Orders;
 
 --Query 4: หาลูกค้าที่มียอดใช้จ่ายรวมสูงสุด Top 5 จากยอดสั่งซื้อรวมทั้งหมด
 SELECT CustomerID, FirstName, LastName, TotalSpent, rn
-FROM (SELECT c.CustomerID, c.FirstName, c.LastName, SUM(o.TotalAmount) AS TotalSpent,
-ROW_NUMBER() OVER (ORDER BY SUM(o.TotalAmount) DESC) AS rn
-FROM Customers c
-JOIN Orders o
+FROM (SELECT c.CustomerID, c.FirstName, c.LastName, SUM(o.TotalAmount) as TotalSpent,
+ROW_NUMBER() OVER (ORDER BY SUM(o.TotalAmount) DESC) as rn
+FROM Customersas as c
+JOIN Orders as o
 ON c.CustomerID = o.CustomerId
 GROUP BY c.CustomerID, c.FirstName, c.LastName)
 sub WHERE rn <= 5;
@@ -113,12 +117,12 @@ sub WHERE rn <= 5;
 --Query 5: แสดงหมวดหมู่สินค้าที่ขายดีที่สุด
 SELECT CategoryID, CategoryName, TotalQuantitySold, rn
 FROM (
-SELECT c.CategoryID, c.CategoryName, SUM(oi.Quantity) AS TotalQuantitySold,
-ROW_NUMBER() OVER (ORDER BY SUM(oi.Quantity) DESC) AS rn
-FROM OrderItems oi
-JOIN Products p 
+SELECT c.CategoryID, c.CategoryName, SUM(oi.Quantity) as TotalQuantitySold,
+ROW_NUMBER() OVER (ORDER BY SUM(oi.Quantity) DESC) as rn
+FROM OrderItems as oi
+JOIN Products as p 
 ON oi.ProductID = p.ProductID
-JOIN Categories c
+JOIN Categories as c
 ON p.CategoryID = c.CategoryID
 GROUP BY c.CategoryID, c.CategoryName) sub
 WHERE rn = 1;
@@ -132,13 +136,15 @@ SELECT *
 FROM Products WHERE Stock = 0;
 -- ให้แสดง category name ด้วย
 SELECT p.ProductID, p.ProductName, c.CategoryName, p.Stock 
-FROM Products p JOIN Categories c
+FROM Products as p 
+JOIN Categories as c
 ON p.CategoryID = c.CategoryID
 WHERE Stock = 0;
 
 --Query 7: แสดงลูกค้าที่มีการสั่งซื้อภายใน 30 วันที่ผ่านมา
 SELECT c.CustomerID, c.FirstName, c.LastName, c.Email, c.Phone
-FROM Customers c JOIN Orders o
+FROM Customers as c 
+JOIN Orders as o
 ON c.CustomerID = o.CustomerID
 WHERE o.OrderDate >= DATEADD(DAY, -30, GETDATE());
 
@@ -152,86 +158,100 @@ ORDER BY OrderYear, OrderMonth;
 
 --Query 9: แสดงรายละเอียดของคำสั่งซื้อล่าสุด (ข้อมูลที่ใหม่สุดล่าสุด)
 SELECT TOP 1 o.OrderID, o.OrderDate, o.TotalAmount, c.FirstName, c.LastName
-FROM Orders o JOIN Customers c
+FROM Orders as o 
+JOIN Customers as c
 ON o.CustomerID = c.CustomerID
 ORDER BY o.OrderDate DESC;
 
 --Query 10: หาค่าเฉลี่ยราคาสินค้าในแต่ละหมวดหมู่
 SELECT c.CategoryID, c.CategoryName, AVG(p.Price) as AveragePrice 
-FROM Categories c JOIN Products p
+FROM Categories as c 
+JOIN Products as p
 ON c.CategoryID = p.ProductID
 GROUP BY c.CategoryID, c.CategoryName;
 
 --Query 11: แสดงรายชื่อลูกค้าที่ไม่เคยสั่งซื้อเลย
 SELECT c.CustomerID, c.FirstName, c.LastName, c.Email, c.Phone, O.OrderID, o.TotalAmount
-FROM Customers c LEFT OUTER JOIN Orders o
+FROM Customers as c 
+LEFT OUTER JOIN Orders as o
 ON c.CustomerID = o.CustomerID
 WHERE o.OrderId IS NULL;
 
 --Query 12: แสดงสินค้าแต่ละตัวขายไปทั้งหมดกี่ชิ้น
-SELECT p.ProductID, p.ProductName, SUM(oi.Quantity) AS TotalQuantitySold
-FROM OrderItems oi JOIN Products p
+SELECT p.ProductID, p.ProductName, SUM(oi.Quantity) as TotalQuantitySold
+FROM OrderItems as oi 
+JOIN Products as p
 ON oi.ProductID = p.ProductID
 GROUP BY p.ProductID, p.ProductName
 ORDER BY  p.ProductName;
 
 --Query 13: คำนวณหารายได้รวมของสินค้าในแต่ละหมวดหมู่
-SELECT c.CategoryID, c.CategoryName, SUM(oi.Quantity * oi.Price) AS TotalRevenue
-FROM OrderItems oi JOIN Products p
+SELECT c.CategoryID, c.CategoryName, SUM(oi.Quantity * oi.Price) as TotalRevenue
+FROM OrderItems as oi 
+JOIN Products as p
 ON oi.ProductID = p.ProductID
-JOIN Categories c
+JOIN Categories as c
 ON c.CategoryID = p.CategoryID
 GROUP BY c.CategoryID, c.CategoryName
 ORDER BY TotalRevenue DESC;
 
 --Query 14: แสดงสินค้าที่มีราคาแพงที่สุดในแต่ละหมวดหมู่
 SELECT c.CategoryID, c.CategoryName, p1.ProductID, p1.ProductName, p1.Price
-FROM Categories c JOIN Products p1
+FROM Categories as c 
+JOIN Products as p1
 ON c.CategoryID = p1.CategoryID
 WHERE p1.Price = (SELECT Max(Price) FROM Products p2 WHERE p2.CategoryID = p1.CategoryID)
 ORDER BY p1.Price DESC;
 
 --Query 15: แสดงรายการออเดอร์ที่มียอดรวมมากกว่าค่าที่กำหนด (>= 49.99)
 SELECT o.OrderID, c.CustomerID, c.FirstName, c.LastName, o.TotalAmount
-FROM Orders o JOIN Customers c
+FROM Orders as o 
+JOIN Customers as c
 ON o.CustomerID = c.CustomerID
 WHERE o.TotalAmount >= 49.99
 ORDER BY o.TotalAmount DESC;
 
 --Query 16: แสดงรายการสินค้า พร้อมจำนวนออเดอร์ที่สินค้านั้นถูกสั่ง (นับจำนวนออเดอร์ที่มีสินค้านั้น)
 SELECT p.ProductID, p.ProductName, COUNT(oi.OrderID) as OrderCount
-FROM Products p JOIN OrderItems oi
+FROM Products as p 
+JOIN OrderItems as oi
 ON p.ProductID = oi.ProductID
 GROUP BY p.ProductID, p.ProductName
 ORDER BY OrderCount DESC;
 
 --Query 17: แสดงสินค้า 3 อันดับแรกที่ถูกสั่งบ่อยที่สุด
-SELECT TOP 3 p.ProductID, p.ProductName, COUNT(oi.OrderID) AS OrderCount
-FROM OrderItems oi JOIN  Products p
+SELECT TOP 3 p.ProductID, p.ProductName, COUNT(oi.OrderID) as OrderCount
+FROM OrderItems as oi 
+JOIN  Products as p
 ON oi.ProductID = p.ProductID
 GROUP BY  p.ProductID, p.ProductName
 ORDER BY OrderCount DESC;
 
 --Query 18: คำนวณจำนวนลูกค้าทั้งหมดในแต่ละประเทศ
-SELECT Country, COUNT(CustomerID) AS TotalCustomers
-FROM Customers GROUP BY Country ORDER BY TotalCustomers DESC;
+SELECT Country, COUNT(CustomerID) as TotalCustomers
+FROM Customers 
+GROUP BY Country 
+ORDER BY TotalCustomers DESC;
 
 --Query 19: แสดงรายชื่อลูกค้า และยอดใช้จ่ายรวมของแต่ละคน
-SELECT c.CustomerID, c.FirstName, c.LastName, SUM(o.TotalAmount) AS TotalSpending
-FROM Customers c JOIN Orders o
+SELECT c.CustomerID, c.FirstName, c.LastName, SUM(o.TotalAmount) as TotalSpending
+FROM Customers as c 
+JOIN Orders as o
 ON c.CustomerID = o.CustomerID
 GROUP BY c.CustomerID, c.FirstName, c.LastName;
 
 
 --Query 20: แสดงออเดอร์ที่มีจำนวนสินค้ามากกว่าค่าที่กำหนด (>= 1)
-SELECT o.OrderID, c.CustomerID, c.FirstName, c.LastName, COUNT(oi.OrderItemID) AS NumberOfItems
-FROM Orders o JOIN OrderItems oi
+SELECT o.OrderID, c.CustomerID, c.FirstName, c.LastName, COUNT(oi.OrderItemID) as NumberOfItems
+FROM Orders as o 
+JOIN OrderItems as oi
 ON o.OrderID = oi.OrderID
-JOIN Customers c 
+JOIN Customers as c 
 ON o.CustomerID = c.CustomerID
 GROUP BY o.OrderID, c.CustomerID, c.FirstName, c.LastName
 HAVING COUNT(oi.OrderItemID) >= 1
 ORDER BY NumberOfItems;
+
 
 
 
