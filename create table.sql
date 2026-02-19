@@ -1,4 +1,4 @@
-
+--สร้างตารางข้อมูล--
 CREATE TABLE Customers (
 	CustomerID INT PRIMARY KEY IDENTITY(1,1),
 	FirstName NVARCHAR(50),
@@ -27,4 +27,5 @@ CREATE TABLE Orders (
 	OrderDate DATETIME DEFAULT GETDATE(),
 	TotalAmount DECIMAL(10,2),
 	FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+
 );
