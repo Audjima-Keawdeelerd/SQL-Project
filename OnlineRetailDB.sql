@@ -252,6 +252,9 @@ GROUP BY o.OrderID, c.CustomerID, c.FirstName, c.LastName
 HAVING COUNT(oi.OrderItemID) >= 1
 ORDER BY NumberOfItems;
 
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 
 
 
