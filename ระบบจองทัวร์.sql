@@ -1500,16 +1500,152 @@ INSERT INTO Travelitinerary(ItineraryID,DayNumber,DepartureTime,ArrivalTime,Acti
 VALUE('Itinerary07','day 3','09:00:00','10:00:00','Watch the sunset in the middle of the sea and capture the nature and lifestyle of the fishermen.','P02','A02D03','PD07');
 
 
+--ในวันพรีเซนมีการทดสอบ Query ข้อมูลเพื่อตอบคำถามอาจารย์ต้องการ--
 
+--จงเขียนคำสั่งเพื่อเรียกดูข้อมูลแพ็กเก็จทัวร์ทั้งหมด 
+SELECT * 
+from TourPackage;
 
+--จงเขียนคำสั่ง SQL เพื่อเรียกดูข้อมูลแพ็กเกจการจองทัวร์ทุกแพ็กเกจ ซึ่งประกอบด้วย รหัสแพ็กเกจ ชื่อเเพ็กเกจ รายละเอียดเเพ็กเกจ ราคา จำนวนที่นั่งทั้งหมด  ประเภทของทัวร์  วันที่อัปเดตล่าสุด 
+--วันที่เริ่มต้นการเดินทาง วันที่สิ้นสุดการเดินทาง รหัสประจำตัวของมัคคุเทศก์ และรหัสคนขับรถ โดยเรียกดูเฉพาะชื่อเเพ็กเกจทัวร์ Koh Chang 3 Days 2 Nights 
+SELECT * FROM TourPackage 
+WHERE PackageName = 'Koh Chang 3 Days 2 Nights'; 
 
+--จงเขียนคำสั่งเพื่อเรียกดูข้อมูลแอดมินทั้งหมดประกอบไปด้วย รหัสแอดมิน ชื่อแอดมินและรหัส 
+SELECT * 
+from Admin; 
 
+--จงเขียนคำสั่ง SQL เพื่อเรียกดูข้อมูลแพ็กเกจการจองทัวร์ทุกแพ็กเกจ ซึ่งประกอบด้วย ชื่อสถานที่ท่องเที่ยว วันที่ของการเดินทาง เวลาเริ่มออกเดินทาง และรายละเอียดของกิจกรรมที่ทำในวันนั้น 
+SELECT AttractionName, DayNumber, DepartureTime, ActivityDescription 
+FROM TouristAttractions  
+INNER JOIN TravelItinerary 
+ON Touristattractions.AttractionID = TravelItinerary.AttractionID;
 
+--จงเขียนคำสั่ง SQL เพื่อเรียกดูข้อมูลแพ็กเกจการจองทัวร์ทุกแพ็กเกจ ซึ่งประกอบด้วย ชื่อ-นามสกุล ลูกค้า ชื่อเเพ็กเกจ รายละเอียดเเพ็กเกจ และวันที่จอง 
+SELECT FirstName, LastName, PackageName, PackageDescription, BookingDate  
+FROM  Customer 
+INNER JOIN Booking 
+ON Customer.CustomerID = Booking.CustomerID 
+INNER JOIN TourPackage 
+ON Booking.PackageID = TourPackage.PackageID;
 
+--จงเขียนคำสั่ง SQL เพื่อเรียกดูข้อมูลแพ็กเกจการจองทัวร์ทุกแพ็กเกจ ซึ่งประกอบด้วย ชื่อ-นามสกุล ลูกค้า วันที่จอง จำนวนที่นั่งที่จอง ชื่อเเพ็กเกจ ราคา คะแนนรีวิว และความคิดเห็น   
+SELECT FirstName, LastName, BookingDate, NumberOfSeat, PackageName, PackagePrice, Rating, Comment  
+FROM  Customer 
+INNER JOIN Booking 
+ON Customer.CustomerID = Booking.CustomerID 
+INNER JOIN TourPackage 
+ON Booking.PackageID = TourPackage.PackageID 
+INNER JOIN Review 
+ON TourPackage.PackageID = Review.PackageID; 
 
+--จงเขียนคำสั่งเพื่อเรียกดูข้อมูลการชำระเงิน ซึ่งประกอบไปด้วย  วันที่ชำระเงิน สเตตัสชำระเงิน  โค้ดส่วนลด เปอร์เซ็นต์ส่วนลด 
+SELECT PaymentDate, PaymentStatus, DiscountCode, DiscountPercentage 
+FROM Payment 
+INNER JOIN DiscountCodes 
+ON  Payment.CodeID =  DiscountCodes.CodeID; 
 
+--จงเขียนคำสั่งเพื่อเรียกดูข้อมูลลูกค้าโดยข้อมูลประกอบไปด้วย รหัสลูกค้า ชื่อจริงลูกค้า รหัสการจอง ที่นั่งและชื่อแอดมิน 
+SELECT customer.CustomerID, customer.FirstName, Booking.BookingID, 
+Booking.NumberOfSeat, Admin.Username  
+FROM Customer 
+INNER JOIN Booking 
+ON  Customer.CustomerID = Booking.CustomerID 
+INNER JOIN Admin 
+ON  Admin.AdminID = Booking.AdminID;
 
+--จงเขียนคำสั่งเพื่อเรียกดูข้อมูลแพ็กเกจทัวร์ ประกอบไปด้วย ชื่อแพ็กเกจทัวร์  ราคาแพ็กเกจทัวร์ รายละเอียดกิจกรรม ชื่อสถานที่ท่องเที่ยวและชื่อจังหวัด    
+SELECT PackageName, PackagePrice, ActivityDescription, AttractionName, 
+NameProvince  
+FROM TourPackage 
+INNER JOIN TravelItinerary 
+ON  TourPackage.PackageID= TravelItinerary.PackageID 
+INNER JOIN TouristAttractions 
+ON  TouristAttractions.AttractionID = TravelItinerary.AttractionID 
+INNER JOIN Province 
+ON  Province.ProvinceID = TouristAttractions.ProvinceID; 
 
+--จงเขียนคำสั่งเพื่อเรียกดูข้อมูลรายชื่อของลูกค้า ซึ่งประกอบไปด้วย ชื่อลูกค้า นามสกุล อีเมล เบอร์โทรศัพท์และสัญชาติ 
+SELECT FIRSTName, LastName, Email, Phone, Nationality 
+FROM Customer 
+INNER JOIN Nationality 
+ON  Customer.NationalityID = Nationality.NationalityID; 
+
+--จงเขียนคำสั่งเพื่อเรียกดูข้อมูลแพ็กเก็จทัวร์โดยข้อมูลประกอบไปด้วย ชื่อแพ็กเกจทัวร์ วันที่ของการเดินทาง เวลาออกเดินทาง เวลาถึงจุดหมาย รายละเอียดกิจกรรม 
+--และชื่อสถานที่ท่องเที่ยว 
+SELECT PackageName, DayNumber, DepartureTime, ArrivalTime, ActivityDescription, 
+AttractionName 
+FROM TourPackage 
+INNER JOIN TravelItinerary 
+ON  TourPackage.packageID = TravelItinerary.packageID 
+INNER JOIN Touristattractions 
+ON  Touristattractions.AttractionID = TravelItinerary.AttractionID;
+
+--จงเขียนคำสั่งเพื่อเรียกดูข้อมูลการจองทัวร์ ประกอบไปด้วย รหัสการจอง วันที่จอง ชื่อผู้ดูแลระบบ ชื่อลูกค้า  นามสกุล  เบอร์โทรศัพท์ ชื่อแพ็กเกจทัวร์ 
+SELECT BookingID, BookingDate, Username, FirstName, LastName, Phone, 
+PackageName  
+FROM Booking 
+INNER JOIN Admin 
+ON  Booking.AdminID= Admin.AdminID 
+INNER JOIN Customer 
+ON  Booking.CustomerID = Customer.CustomerID 
+INNER JOIN TourPackage 
+ON  Booking.PackageID = TourPackage.PackageID; 
+
+--จงเขียนคำสั่ง SQL เพื่อเรียกดูข้อมูลลูกค้า ซึ่งประกอบด้วย รีวิวของลูกค้า ชื่อของลูกค้า นามสกุลของลูกค้า เพศของลูกค้า วันเดือนปีเกิดของลูกค้า อีเมลของลูกค้า 
+--เบอร์โทรศัพท์ของลูกค้า  และที่อยู่ของลูกค้า 
+SELECT *  
+FROM Customer  
+INNER JOIN Review 
+ON Customer.CustomerID = Review.CustomerID; 
+จงเขียนคำสั่ง SQL เพื่อเรียกดูข้อมูลลูกค้าและการจอง ซึ่งประกอบด้วย ชื่อลูกค้า นามสกุลลูกค้า 
+วันที่จอง สถานะการจอง และชื่อแพ็กเกจที่ลูกค้าจอง 
+SELECT FirstName, LastName, BookingDate, Status, PackageName 
+FROM Customer 
+INNER JOIN Booking 
+ON Customer.CustomerID = Booking.CustomerID  
+INNER JOIN TourPackage 
+ON Booking.PackageID = TourPackage.PackageID;
+
+--จงเขียนคำสั่ง SQL เพื่อเรียกดูข้อมูลลูกค้าและการจอง ซึ่งประกอบด้วย ชื่อลูกค้า นามสกุลลูกค้า รหัสการจองของลูกค้า จำนวนเงินส่วนลด วันที่ชำระเงิน และวิธีการชำระเงิน 
+SELECT Firstname, LastName, BookingID, DiscountAmount, PaymentDate, PaymentMethod 
+FROM Customer 
+INNER JOIN Booking 
+ON Customer.CustomerID = Booking.CustomerID 
+INNER JOIN DiscountCodes 
+ON Booking.CodeID = DiscountCodes.CodeID 
+INNER JOIN Payment 
+ON DiscountCodes.CodeID = Payment.CodeID; 
+
+--จงเขียนคำสั่ง SQL เพื่อดึงข้อมูลชื่อ ทัวร์ และราคาทัวร์ทั้งหมดจากตาราง แพ็กเกจทัวร์ 
+SELECT PackageName, PackagePrice  
+FROM TourPackage;
+
+--จงเขียนคำสั่ง SQL เพื่อดึงข้อมูลชื่อและเบอร์โทรของไกด์ทั้งหมดที่เกี่ยวข้องกับแพ็กเกจทัวร์ 
+SELECT Guide.GuideName, Guide.GuidePhoneNumber  
+FROM TourPackage  
+INNER JOIN Guide  
+ON TourPackage.GuideID = Guide.GuideID; 
+
+--จงเขียนคำสั่ง SQL เพื่อดึงข้อมูลรหัสการจอง, วันที่จอง, และชื่อผู้จองที่เกี่ยวข้องกับทัวร์แต่ละแพ็กเกจ 
+SELECT Booking.BookingID, Booking.BookingDate, Customer.FirstName 
+FROM Booking  
+INNER JOIN Customer  
+ON Booking.CustomerID = Customer.CustomerID 
+INNER JOIN TourPackage 
+ON Booking.PackageID = TourPackage.PackageID; 
+
+--จงเขียนคำสั่ง SQL เพื่อดึงข้อมูลชื่อไกด์, ชื่อแพ็กเกจ, สถานที่ท่องเที่ยว และจังหวัดที่เกี่ยวข้องกับแต่ละแพ็กเกจทัวร์ 
+SELECT Guide.GuideName, TourPackage.PackageName, Touristattractions.AttractionName, Province.NameProvince 
+FROM TourPackage 
+INNER JOIN Guide 
+ON TourPackage.GuideID = Guide.GuideID 
+INNER JOIN TravelItinerary 
+ON TourPackage.PackageID = TravelItinerary.PackageID 
+INNER JOIN Touristattractions 
+ON TravelItinerary.AttractionID = Touristattractions.AttractionID 
+INNER JOIN Province 
+ON Touristattractions.ProvinceID = Province.ProvinceID;
 
 
 
